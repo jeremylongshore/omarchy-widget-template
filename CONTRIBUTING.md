@@ -25,7 +25,8 @@ surface, or a shell string the engine rejects. If you have rig access:
 
 ```bash
 scripts/rig-verify.sh    # validate + qmllint against a fingerprint of the tree
-scripts/rig-render.sh . preview.png # load, crop, screenshot, and bind the image receipt
+scripts/rig-render.sh . preview.png # direct full-frame screenshot + render receipt
+scripts/approve-preview.sh          # approve value, fit, and plugin-specific identity
 ```
 
 Both receipts record the source commit, whether shipped source was dirty, and

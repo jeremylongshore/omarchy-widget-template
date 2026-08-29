@@ -13,5 +13,6 @@ jq -e '.sourceDirty == false and .sourcePackageSha256 == .remotePackageSha256' \
 jq -e '.sourceDirty == false and .sourcePackageSha256 == .remotePackageSha256
   and (.previewSha256 | length == 64) and .dimensions == "1280 x 720"
   and .nonblackCoverage >= 0.35 and (.runId | length > 0)
-  and (.rawShellLogSha256 | length == 64)' \
+  and (.rawShellLogSha256 | length == 64)
+  and .visualInspection.status == "pending"' \
   "$REPO_ROOT/.render-proof.json" >/dev/null

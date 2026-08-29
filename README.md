@@ -74,13 +74,15 @@ the current catalog allowance. Generated plugins must replace it with concrete
 product copy of the same length. Gate C43 also refuses a missing or placeholder
 banner and, at submission time, requires a focused 16:9 live preview whose
 bytes, run ID, raw shell-log hash, and clean source package match the committed
-render receipt.
+render receipt. C43 remains blocked until the exact preview also carries the
+three-item, hash-bound visual inspection approval.
 
 On an Omarchy rig (the validator and qmllint live there):
 
 ```bash
 scripts/rig-verify.sh             # validator + qmllint, receipt bound to source
 scripts/rig-render.sh . preview.png # real shell render + screenshot receipt
+scripts/approve-preview.sh          # inspect at marketplace scale + bind approval
 ```
 
 Only then draft the marketplace submission issue, and have a human approve

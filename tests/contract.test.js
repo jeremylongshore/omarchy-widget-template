@@ -38,8 +38,22 @@ test("template makes marketplace presentation requirements impossible to overloo
   assert.match(banner, /<(?:path|circle)\b/)
   const render = read("scripts/rig-render.sh")
   assert.match(render, /OMARCHY_RIG_RESOLUTION:-1280x720/)
+  assert.match(render, /OMARCHY_RIG_SCALE:-1\.25/)
   assert.match(render, /rawShellLogSha256/)
+  assert.match(render, /visualInspection:\{status:"pending"/)
   assert.match(render, /refusing to write a clean receipt for a warning-bearing shell log/)
   assert.match(render, /grim "\\\$SHOT"/)
   assert.doesNotMatch(render, /grim -g|pkill/)
+
+  const approval = read("scripts/approve-preview.sh")
+  assert.match(approval, /product value is visible without reading the README/)
+  assert.match(approval, /no primary content is clipped/)
+  assert.match(approval, /plugin-specific visual identity/)
+})
+
+test("canonical freshness compares a cloned tree without executable downloads", () => {
+  const freshness = read("scripts/check-lane-freshness.sh")
+  assert.match(freshness, /git clone --quiet --depth 1 --branch/)
+  assert.match(freshness, /sha256sum "\$canonical"/)
+  assert.doesNotMatch(freshness, /\bcurl\b|\bwget\b/)
 })

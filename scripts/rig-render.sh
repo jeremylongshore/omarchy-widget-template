@@ -14,7 +14,7 @@ OUT="${2:-$TARGET/preview.png}"
 HOST="${OMARCHY_RIG_HOST:-intent-ops-buzz}"
 CONTAINER="${OMARCHY_RIG_CONTAINER:-omarchy-rig}"
 RES="${OMARCHY_RIG_RESOLUTION:-1280x720}"
-SCALE="${OMARCHY_RIG_SCALE:-2}"
+SCALE="${OMARCHY_RIG_SCALE:-1.25}"
 
 for tool in jq identify convert; do
   command -v "$tool" >/dev/null 2>&1 || { echo "rig-render: $tool is required" >&2; exit 2; }
@@ -194,6 +194,7 @@ jq -n --arg fp "$FP" --arg commit "$SOURCE_COMMIT" --argjson dirty "$SOURCE_DIRT
     sourcePackageSha256:$archive,remotePackageSha256:$remote,rig:$rig,runId:$run,rawShellLogSha256:$logSha,
     packageBoundary:"runtime tree; generated proof receipts, reports, tests, developer scripts, and marketplace preview excluded",
     evidenceBoundary:"isolated real Omarchy shell and QML under a dedicated headless compositor; plugin-specific fixture hook when present; live plugin IPC toggle; direct full-frame grim capture with no crop or image post-processing",
+    visualInspection:{status:"pending",previewSha256:$sha,checks:[]},
     previewSha256:$sha,dimensions:$dimensions,nonblackCoverage:($coverage|tonumber),capturedAt:$at}' \
   > "$TARGET/.render-proof.json"
 
