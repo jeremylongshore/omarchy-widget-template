@@ -25,8 +25,14 @@ surface, or a shell string the engine rejects. If you have rig access:
 
 ```bash
 scripts/rig-verify.sh    # validate + qmllint against a fingerprint of the tree
-scripts/rig-render.sh    # load it into a running shell and screenshot it
+scripts/rig-render.sh . preview.png # load, crop, screenshot, and bind the image receipt
 ```
+
+Both receipts record the source commit, whether shipped source was dirty, and
+the local and Buzz package hashes. `.render-proof.json` also records the exact
+preview hash and dimensions. A plugin-specific integration must extend the
+render journey with deterministic fixture data and assert its primary action;
+the generic template can only prove load, toggle, and render.
 
 If you do not, say so in the pull request. An unverified change that admits it
 is fine; one that implies verification it did not do is not.

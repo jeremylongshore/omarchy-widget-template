@@ -28,7 +28,8 @@ TARGET="$(cd "${1:-$(dirname "$0")/..}" && pwd)"
 OUT="${2:-$TARGET/render.png}"
 HOST="${OMARCHY_RIG_HOST:-intent-ops-buzz}"
 CONTAINER="${OMARCHY_RIG_CONTAINER:-omarchy-rig}"
-RES="${OMARCHY_RIG_RESOLUTION:-1920x1200}"
+RES="${OMARCHY_RIG_RESOLUTION:-1280x900}"
+SHOT_GEOMETRY="${OMARCHY_RIG_SHOT_GEOMETRY:-320,0 960x600}"
 
 command -v jq >/dev/null 2>&1 || { echo "rig-render: jq is required" >&2; exit 2; }
 [[ -f "$TARGET/manifest.json" ]] || { echo "rig-render: no manifest.json in $TARGET" >&2; exit 2; }
@@ -37,11 +38,29 @@ MOD="$(jq -r '.id // empty' "$TARGET/manifest.json")"
 [[ -n "$MOD" ]] || { echo "rig-render: manifest.json has no id" >&2; exit 2; }
 NAME="${MOD##*.}"
 
+fingerprint() {
+  ( cd "$TARGET" && \
+    find . -type f \
+      -not -path './.git/*' -not -path './tests/*' \
+      -not -path './scripts/*' -not -path './node_modules/*' \
+      \( -name '*.qml' -o -name '*.js' -o -name 'manifest.json' -o -perm -u+x \) \
+      -print0 2>/dev/null \
+    | LC_ALL=C sort -z | xargs -0 cat 2>/dev/null | sha256sum | cut -d' ' -f1 )
+}
+FP="$(fingerprint)"
+SOURCE_COMMIT="$(git -C "$TARGET" rev-parse HEAD 2>/dev/null || printf unknown)"
+SOURCE_DIRTY=false
+if [[ "$SOURCE_COMMIT" == "unknown" ]] || \
+   [[ -n "$(git -C "$TARGET" status --porcelain --untracked-files=all -- '*.qml' '*.js' manifest.json bin 2>/dev/null)" ]]; then
+  SOURCE_DIRTY=true
+fi
+
 TGZ="$(mktemp -t rigrender-XXXXXX.tgz)"
 trap 'rm -f "$TGZ"' EXIT
 # tests/ and scripts/ are not shipped to a user, so they are not shipped here.
 tar czf "$TGZ" -C "$TARGET" --exclude=.git --exclude=tests --exclude=scripts --exclude=node_modules . || {
   echo "rig-render: could not package the tree" >&2; exit 2; }
+ARCHIVE_SHA="$(sha256sum "$TGZ" | cut -d' ' -f1)"
 
 echo "rig-render: shipping $NAME to $HOST/$CONTAINER"
 scp -q "$TGZ" "$HOST:/tmp/rigrender.tgz" || { echo "rig-render: cannot reach $HOST" >&2; exit 2; }
@@ -52,8 +71,11 @@ REMOTE="$(mktemp -t rigrender-XXXXXX.sh)"
 trap 'rm -f "$TGZ" "$REMOTE"' EXIT
 cat > "$REMOTE" <<REMOTE_EOF
 #!/bin/sh
-MOD="$MOD"; NAME="$NAME"; RES="$RES"
+set -eu
+MOD="$MOD"; NAME="$NAME"; RES="$RES"; SHOT_GEOMETRY="$SHOT_GEOMETRY"
 export XDG_RUNTIME_DIR=/tmp/xdgrt
+export OMARCHY_PATH=/root/omarchy
+export PATH=/root/omarchy/bin:\$PATH
 mkdir -p \$XDG_RUNTIME_DIR; chmod 700 \$XDG_RUNTIME_DIR
 
 # Start a headless compositor only if one is not already serving.
@@ -65,7 +87,7 @@ export WAYLAND_DISPLAY=wayland-1
 export SWAYSOCK=\$(ls \$XDG_RUNTIME_DIR/sway-ipc.*.sock 2>/dev/null | head -1)
 swaymsg output HEADLESS-1 resolution "\$RES" >/dev/null 2>&1
 
-pkill -f 'qs -p' 2>/dev/null; sleep 1
+pkill -f 'qs -p' 2>/dev/null || true; sleep 1
 # Purge EVERY directory that declares this module id, not just the one matching
 # our folder name. The rig accumulates installs from earlier runs and from the
 # omarchy CLI, which names its folder after the full id; a stale copy of the
@@ -95,11 +117,14 @@ sleep 18
 echo "===QML WARNINGS==="
 # libEGL/MESA/ZINK noise is the headless software renderer, not the plugin.
 grep -a -iE "cannot assign|is not a type|unable to|no such|ERROR" /tmp/qs-render.log \
-  | grep -av libEGL | grep -av MESA | grep -av ZINK | head -10
+  | grep -av libEGL | grep -av MESA | grep -av ZINK \
+  | grep -av 'pw.loop' | grep -av 'quickshell.service.pipewire.loop' \
+  | grep -av 'org.freedesktop.UPower' | head -10 || true
 
 qs -p /root/omarchy/shell ipc call "\$MOD" toggle 2>/dev/null
 sleep 6
-grim /tmp/rigrender.png 2>/dev/null
+grim -g "\$SHOT_GEOMETRY" /tmp/rigrender.png 2>/dev/null
+echo "===PACKAGE=== \$(sha256sum /tmp/rigrender.tgz | awk '{print \$1}')"
 echo "===SHOT=== \$(ls -l /tmp/rigrender.png 2>/dev/null | awk '{print \$5}') bytes"
 REMOTE_EOF
 
@@ -110,6 +135,7 @@ RESULT="$(ssh "$HOST" "docker cp /tmp/rigrender.tgz $CONTAINER:/tmp/ >/dev/null 
 
 WARNINGS="$(printf '%s' "$RESULT" | sed -n '/===QML WARNINGS===/,/===SHOT===/p' | grep -vE '===' || true)"
 SIZE="$(printf '%s' "$RESULT" | grep -oE '===SHOT=== [0-9]+' | grep -oE '[0-9]+' || true)"
+REMOTE_SHA="$(printf '%s' "$RESULT" | grep -oE '===PACKAGE=== [a-f0-9]{64}' | awk '{print $2}' || true)"
 
 if [[ -n "$WARNINGS" ]]; then
   echo "rig-render: the shell reported problems loading this plugin:"
@@ -121,9 +147,25 @@ if [[ -z "$SIZE" || "$SIZE" -lt 4000 ]]; then
   echo "rig-render: check /tmp/qs-render.log inside the container" >&2
   exit 1
 fi
+if [[ "$REMOTE_SHA" != "$ARCHIVE_SHA" ]]; then
+  echo "rig-render: remote package hash does not match the source package" >&2
+  exit 1
+fi
 
 ssh "$HOST" "docker cp $CONTAINER:/tmp/rigrender.png /tmp/rigrender-out.png >/dev/null" || exit 1
 scp -q "$HOST:/tmp/rigrender-out.png" "$OUT" || exit 1
+
+PREVIEW_SHA="$(sha256sum "$OUT" | cut -d' ' -f1)"
+DIMENSIONS="$(file "$OUT" | sed -nE 's/.*PNG image data, ([0-9]+ x [0-9]+),.*/\1/p')"
+jq -n --arg fp "$FP" --arg commit "$SOURCE_COMMIT" --argjson dirty "$SOURCE_DIRTY" \
+  --arg archive "$ARCHIVE_SHA" --arg remote "$REMOTE_SHA" \
+  --arg rig "$HOST/$CONTAINER" --arg sha "$PREVIEW_SHA" --arg dimensions "$DIMENSIONS" \
+  --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  '{fingerprint:$fp,sourceCommit:$commit,sourceDirty:$dirty,
+    sourcePackageSha256:$archive,remotePackageSha256:$remote,rig:$rig,
+    evidenceBoundary:"real Omarchy shell and QML under a headless compositor; live plugin IPC toggle; integration data must be provided by a plugin-specific e2e extension",
+    previewSha256:$sha,dimensions:$dimensions,capturedAt:$at}' \
+  > "$TARGET/.render-proof.json"
 
 echo "rig-render: wrote $OUT (${SIZE} bytes on the rig)"
 [[ -n "$WARNINGS" ]] && exit 1

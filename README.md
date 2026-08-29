@@ -61,16 +61,15 @@ real entry and had to be swept after the fact.
 On the dev box:
 
 ```bash
-node --test tests/           # unit suite green
-~/.contribute-system/bin/gate-runner.sh omarchy-submit "$(pwd)"   # must PASS
+npm test                         # offline unit and gate-runner regression suite
+scripts/run-plugin-gates.sh .    # vendored, manifest-verified lane must PASS
 ```
 
 On an Omarchy rig (the validator and qmllint live there):
 
 ```bash
-omarchy-plugin-validate .
-qmllint *.qml
-# install, render, screenshot the pill + open panel for preview.png
+scripts/rig-verify.sh             # validator + qmllint, receipt bound to source
+scripts/rig-render.sh . preview.png # real shell render + screenshot receipt
 ```
 
 Only then draft the marketplace submission issue, and have a human approve
