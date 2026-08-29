@@ -143,6 +143,16 @@ jobs:
             at the parser. cat over a glob is the shape that shipped. And a bound
             applied silently is its own defect: if the reader drops data, the
             panel must SAY so, or a partial view looks complete.
+            MUTABLE LOCAL STATE. A plugin-owned state file is still mutable
+            between pathname operations. Do not accept `[[ -f ]]`, `stat`, a
+            timeout, or `mktemp + mv` as proof of a race-safe lifecycle: a
+            same-UID process can replace the final path, a closed temp path, or
+            an ancestor directory before the next open. Flag any runtime state
+            helper without descriptor-bound reads (no-follow/nonblocking, then
+            validate that same descriptor), a pinned parent, and a temporary
+            descriptor retained through bounded write+fsync plus
+            descriptor-relative replacement/cleanup. Demand hostile red proofs
+            for final, temp, parent-swap, FIFO, and oversized-input cases.
             EXEC INJECTION. Omarchy runs a notification --exec value through bash
             -lc, so any unquoted interpolation into an --exec or execDetached
             string is remote code execution. Prefer a Process with an argv array

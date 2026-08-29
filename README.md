@@ -50,6 +50,11 @@ real entry and had to be swept after the fact.
 6. **Omakase constants over settings knobs.** Add a manifest settings schema
    only for choices a user genuinely owns.
 7. **No em dashes, no private names, no stray tildes in anything shipped.**
+8. **Mutable local state needs object-identity proof.** A pathname can be
+   swapped by another process between validation and use. A plugin that stores
+   state must use a descriptor-bound lifecycle and red-proof final-file,
+   temporary-file, parent-swap, FIFO, and oversized-input cases. `mktemp + mv`
+   and a pathname `stat` are not sufficient evidence.
 
 ## Pre-submit checklist
 
