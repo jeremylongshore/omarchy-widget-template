@@ -31,6 +31,8 @@ test("parseExample returns [] on malformed input, keeping last-good state", () =
   assert.deepEqual(Model.parseExample("not json"), [])
   assert.deepEqual(Model.parseExample(""), [])
   assert.deepEqual(Model.parseExample(null), [])
+  assert.deepEqual(Model.parseExample("null"), [])
+  assert.deepEqual(Model.parseExample("[]"), [])
 })
 
 test("parseExample maps rows through clean", () => {
@@ -39,7 +41,28 @@ test("parseExample maps rows through clean", () => {
   assert.equal(rows[0].name, "balpha/b")
 })
 
+test("parseExample maps every row and bounds both fields", () => {
+  const rows = Model.parseExample(JSON.stringify([
+    { name: "n".repeat(80), value: "v".repeat(40) },
+    { name: "second", value: "2" }
+  ]))
+  assert.equal(rows.length, 2)
+  assert.equal(rows[0].name.length, 32)
+  assert.equal(rows[0].value.length, 16)
+  assert.deepEqual(rows[1], { name: "second", value: "2" })
+})
+
 test("pillText is empty when there is nothing to say", () => {
   assert.equal(Model.pillText([]), "")
   assert.equal(Model.pillText(null), "")
+})
+
+test("pillText returns a bounded first-row label", () => {
+  assert.equal(Model.pillText([{ name: "x".repeat(40) }]), "x".repeat(24))
+})
+
+test("tooltipText reports the row count and tolerates empty input", () => {
+  assert.equal(Model.tooltipText([{ name: "one" }, { name: "two" }]), "2 item(s)")
+  assert.equal(Model.tooltipText([]), "")
+  assert.equal(Model.tooltipText(null), "")
 })

@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "author": "Your Name",
   "license": "MIT",
-  "description": "One-sentence description of what the widget shows in the Omarchy bar.",
+  "description": "Build an Omarchy bar widget from a production-ready starting point instead of an empty folder. This template pairs the Quickshell host and panel contracts with a JavaScript model, accessibility patterns, bounded plain-text rendering, offline unit and mutation tests, canonical security gates, Buzz validation, and real-shell screenshot evidence. Replace every Widget Name placeholder, author a plugin-specific SVG banner, seed your live preview, and ship with exact-run proof rather than assumptions.",
   "kinds": [
     "bar-widget"
   ],

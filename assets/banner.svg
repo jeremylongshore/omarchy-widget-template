@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-labelledby="title desc">
+  <title id="title">Widget Name</title>
+  <desc id="desc">Blueprint starter for a production Omarchy bar widget</desc>
+  <defs>
+    <linearGradient id="gridGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#18263a"/>
+      <stop offset="1" stop-color="#0b111a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="360" fill="url(#gridGlow)"/>
+  <path d="M0 72h1280M0 144h1280M0 216h1280M0 288h1280M128 0v360M256 0v360M384 0v360M512 0v360M640 0v360M768 0v360M896 0v360M1024 0v360M1152 0v360" stroke="#213b57" stroke-width="1"/>
+  <path d="M92 244V102h212v142zM118 218h160V128H118zM338 102h74v142h-74z" fill="none" stroke="#5ad4ff" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="375" cy="134" r="9" fill="#ffb454"/>
+  <text x="474" y="154" fill="#f4f7fb" font-family="monospace" font-size="62" font-weight="700" letter-spacing="5">WIDGET NAME</text>
+  <text x="478" y="214" fill="#9fb5cc" font-family="monospace" font-size="25" letter-spacing="2">REPLACE THE PLACEHOLDER. KEEP THE PROOF.</text>
+  <text x="478" y="278" fill="#5ad4ff" font-family="monospace" font-size="18">QML CONTRACT · TEST LANE · LIVE BUZZ RENDER</text>
+</svg>

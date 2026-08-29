@@ -75,6 +75,8 @@ BarWidget {
     // reads it without parsing the text.
     active: panelLoader.item ? panelLoader.item.isAlert === true : false
     tooltipText: panelLoader.item ? panelLoader.item.tooltip : ""
+    Accessible.role: Accessible.Button
+    Accessible.name: root.opened ? "Close Widget Name" : "Open Widget Name"
 
     onPressed: function(b) {
       if (b === Qt.MiddleButton) root.refresh()

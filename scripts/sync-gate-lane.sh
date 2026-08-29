@@ -52,7 +52,9 @@ fi
 # c41 and c42 were added after five local-only helpers reached marketplace
 # security review: the former blocks mutable-path lifecycle theater, the latter
 # catches unbounded local scans before they hit a periodic QML poller.
-APPLICABLE="c28 c29 c30 c31 c34 c35 c36 c38 c40 c41 c42"
+# c43 treats listing copy, the themed banner, and a hash-bound live preview as
+# release artifacts instead of optional polish.
+APPLICABLE="c28 c29 c30 c31 c34 c35 c36 c38 c40 c41 c42 c43"
 
 mkdir -p "$DEST/lib"
 copied=0

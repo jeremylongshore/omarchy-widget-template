@@ -14,8 +14,9 @@ the pre-submit gates.
 | `BarWidget.qml` | Bar host. Owns the slot and pill button. Shape contract for shell summon/hide/toggle routing. Edit only `moduleName`. |
 | `Panel.qml` | Data lifecycle and popup UI. Fetch via `Process` + `StdioCollector`, parse in `Model.js`, fixed omakase constants, IPC handler, `KeyboardPanel` popup scaffold. |
 | `Model.js` | Pure data layer. Loads in Quickshell AND node, so the whole parse path unit-tests without a shell. `clean()` sanitizer included. |
-| `tests/` | `node --test` harness with fixture loading. Capture real API bodies into `tests/fixtures/`. |
+| `tests/` | Coverage, mutation, race stability, traceability, personas, journeys, and fail-closed gate regression harness. |
 | `manifest.json` | Placeholder manifest with a commented settings schema. |
+| `assets/banner.svg` | Deliberately obvious blueprint banner. Replace it with a theme-specific SVG that names and visually explains the generated plugin. |
 | `.github/workflows/test.yml` | CI: the node test suite on every push. |
 
 ## Instantiate
@@ -62,8 +63,18 @@ On the dev box:
 
 ```bash
 npm test                         # offline unit and gate-runner regression suite
+npm run test:race                # three concurrent clean repetitions
+npm run test:mutation            # mutation score must remain at least 90
+npm run audit                    # hash protection + deep audit + scan
 scripts/run-plugin-gates.sh .    # vendored, manifest-verified lane must PASS
 ```
+
+The marketplace description is intentionally 500 characters because that is
+the current catalog allowance. Generated plugins must replace it with concrete
+product copy of the same length. Gate C43 also refuses a missing or placeholder
+banner and, at submission time, requires a focused 16:9 live preview whose
+bytes, run ID, raw shell-log hash, and clean source package match the committed
+render receipt.
 
 On an Omarchy rig (the validator and qmllint live there):
 

@@ -15,6 +15,7 @@ function clean(value, max) {
   var s = String(value === undefined || value === null ? "" : value)
   s = s.replace(/[<>]/g, "").replace(/[\x00-\x1f\x7f]/g, "")
   var cap = max || 64
+  // Stryker disable next-line ConditionalExpression,EqualityOperator: slice(0, cap) is observationally identical when length is equal to or below cap.
   return s.length > cap ? s.slice(0, cap) : s
 }
 
@@ -22,6 +23,7 @@ function clean(value, max) {
 // returns [] so the panel keeps last-good state.
 function parseExample(raw) {
   var data
+  // Stryker disable next-line StringLiteral,BlockStatement: every fallback string here is parsed only to the same empty result, and the following null/length guard is the catch-path equivalent.
   try { data = JSON.parse(String(raw || "")) } catch (e) { return [] }
   if (!data || !data.length) return []
   var out = []
@@ -44,6 +46,7 @@ function tooltipText(rows) {
   return rows && rows.length ? rows.length + " item(s)" : ""
 }
 
+// Stryker disable next-line ConditionalExpression,StringLiteral: in node all mutated predicates are true; in QML `module` is absent and this branch is intentionally not executable by the node mutation runner.
 if (typeof module !== "undefined") {
   module.exports = {
     clean: clean,
