@@ -63,7 +63,10 @@ blocked=0
 pass=0
 for gate in "$GATES"/c*.sh; do
   label="$(basename "$gate" .sh | cut -d- -f1 | tr '[:lower:]' '[:upper:]')"
-  verdict="$(printf '%s' "$INPUT" | bash "$gate" 2>/dev/null)"
+  # Feed the small JSON envelope with a here-string. A pipe lets a gate that
+  # exits before reading stdin race the producer into SIGPIPE (141), turning a
+  # deterministic invalid-verdict check into an intermittent gate crash.
+  verdict="$(bash "$gate" 2>/dev/null <<< "$INPUT")"
   gate_rc=$?
   # Gate scripts communicate through one JSON object and normally exit zero.
   # A non-zero exit remains a crash even if the script happened to print a

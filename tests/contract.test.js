@@ -51,6 +51,14 @@ test("template makes marketplace presentation requirements impossible to overloo
   assert.match(approval, /product value is visible without reading the README/)
   assert.match(approval, /no primary content is clipped/)
   assert.match(approval, /plugin-specific visual identity/)
+
+  const presentationGate = read("scripts/gates/c43-omarchy-marketplace-presentation.sh")
+  assert.match(presentationGate, /descriptions tell different product stories/)
+  assert.match(presentationGate, /opening sentence is too thin to establish the user outcome/)
+  assert.match(presentationGate, /visible bar, panel, pill, or widget/)
+  assert.match(presentationGate, /concrete user interaction or visible behavior/)
+  assert.match(presentationGate, /privacy, network, data, or write boundary/)
+  assert.match(presentationGate, /generic marketing filler/)
 })
 
 test("canonical freshness compares a cloned tree without executable downloads", () => {
