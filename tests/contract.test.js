@@ -33,6 +33,8 @@ test("manifest entry points exist and stay inside the repository root", () => {
 test("template makes marketplace presentation requirements impossible to overlook", () => {
   const manifest = JSON.parse(read("manifest.json"))
   assert.equal(manifest.description.length, 500)
+  assert.equal(manifest.barWidget.description.length, 500)
+  assert.equal(manifest.barWidget.description, manifest.description)
   const banner = read("assets/banner.svg")
   assert.match(banner, /<title[^>]*>Widget Name<\/title>/)
   assert.match(banner, /<(?:path|circle)\b/)
