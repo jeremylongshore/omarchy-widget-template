@@ -71,8 +71,11 @@ scripts/run-plugin-gates.sh .    # vendored, manifest-verified lane must PASS
 
 The marketplace description is intentionally 500 characters because that is
 the current catalog allowance. Generated plugins must replace it with concrete
-product copy of the same length. Gate C43 also refuses a missing or placeholder
-banner and, at submission time, requires a focused 16:9 live preview whose
+product copy of the same length. Before writing it, replace
+`contracts/marketplace.md` with a claim-by-claim ledger linking each visible
+behavior, data/cadence statement, and trust boundary to shipped source and an
+executable test. Gate C43 also refuses a missing or placeholder banner and, at
+submission time, requires a focused 16:9 live preview whose
 bytes, run ID, raw shell-log hash, and clean source package match the committed
 render receipt. C43 remains blocked until the exact preview also carries the
 three-item, hash-bound visual inspection approval.

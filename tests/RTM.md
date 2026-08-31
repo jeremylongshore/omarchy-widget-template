@@ -12,3 +12,4 @@
 | REQ-TPL-008 | MUST | Each generated plugin replaces placeholders and proves its populated primary action | L6, L7 | plugin-specific tests and render extension |
 | REQ-TPL-009 | MUST | Interactive controls expose accessible names/roles and the popup supports close and tab keyboard routing | L5, L7 | `tests/a11y.test.js` |
 | REQ-TPL-010 | MUST | QML calls only exported Model functions and all identity/entry-point contracts resolve | L4, L6 | `tests/contract.test.js`, `contracts/qml-model.md` |
+| REQ-TPL-011 | MUST | Marketplace copy is exact-length, source-grounded, test-linked, and paired with hash-bound visual evidence | L4, L6, L7 | `contracts/marketplace.md`, `tests/contract.test.js`, C43 |
