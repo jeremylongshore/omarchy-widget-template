@@ -50,6 +50,8 @@ test("template makes marketplace presentation requirements impossible to overloo
   assert.match(render, /rawShellLogSha256/)
   assert.match(render, /visualInspection:\{status:"pending"/)
   assert.match(render, /refusing to write a clean receipt for a warning-bearing shell log/)
+  assert.doesNotMatch(render, /bin preview\.png/,
+    "a failed capture must not poison the next source-clean retry")
   assert.match(render, /grim "\\\$SHOT"/)
   assert.match(render, /-path '\.\/e2e\/\*'/)
   assert.match(render, /export PATH="\\\$PLUGIN_DIR\/e2e\/bin:/)
