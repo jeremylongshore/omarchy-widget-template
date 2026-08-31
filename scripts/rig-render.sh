@@ -71,10 +71,11 @@ SWAY_LOG=/tmp/rigrender-sway-\$RUN_ID.log
 QS_LOG=/tmp/rigrender-qs-\$RUN_ID.log
 SHOT=/tmp/rigrender-\$RUN_ID.png
 PLUGIN_DIR=\$RIG_ROOT/.config/omarchy/plugins/\$NAME
-QS_PID=""; SWAY_PID=""
+QS_PID=""; SWAY_PID=""; DBUS_PID=""
 cleanup() {
   [ -z "\$QS_PID" ] || kill "\$QS_PID" 2>/dev/null || true
   [ -z "\$SWAY_PID" ] || kill "\$SWAY_PID" 2>/dev/null || true
+  [ -z "\$DBUS_PID" ] || kill "\$DBUS_PID" 2>/dev/null || true
 }
 trap cleanup EXIT INT TERM
 
@@ -105,6 +106,13 @@ export WAYLAND_DISPLAY="\${WAYLAND_SOCKET##*/}"
 export SWAYSOCK=\$(find "\$RUNTIME" -maxdepth 1 -type s -name 'sway-ipc.*.sock' | head -1)
 [ -n "\$SWAYSOCK" ] || { echo "rig-render: isolated Sway IPC socket did not start" >&2; exit 1; }
 
+command -v dbus-daemon >/dev/null 2>&1 || { echo "rig-render: dbus-daemon is required for native Omarchy services" >&2; exit 1; }
+DBUS_INFO=\$(dbus-daemon --session --fork --print-address=1 --print-pid=1)
+DBUS_SESSION_BUS_ADDRESS=\$(printf '%s\n' "\$DBUS_INFO" | sed -n '1p')
+DBUS_PID=\$(printf '%s\n' "\$DBUS_INFO" | sed -n '2p')
+[ -n "\$DBUS_SESSION_BUS_ADDRESS" ] && [ -n "\$DBUS_PID" ] || { echo "rig-render: isolated D-Bus session did not start" >&2; exit 1; }
+export DBUS_SESSION_BUS_ADDRESS
+
 SETTINGS_FILE=\$PLUGIN_DIR/e2e/render-settings.json
 if [ -f "\$SETTINGS_FILE" ]; then
   jq -e 'type == "object" and (has("id") | not)' "\$SETTINGS_FILE" >/dev/null || {
@@ -121,6 +129,7 @@ else
 fi
 
 export HOME="\$RIG_ROOT" OMARCHY_PATH=/root/omarchy PLUGIN_DIR MOD
+export PATH="\$OMARCHY_PATH/bin:\$PATH"
 if [ -d "\$PLUGIN_DIR/e2e/bin" ]; then
   for fixture_command in "\$PLUGIN_DIR"/e2e/bin/*; do
     [ -f "\$fixture_command" ] || continue
@@ -144,7 +153,11 @@ sleep 18
 HOOK=\$PLUGIN_DIR/e2e/rig-before-capture.sh
 if [ -f "\$HOOK" ]; then
   [ -x "\$HOOK" ] || { echo "rig-render: e2e/rig-before-capture.sh is not executable" >&2; exit 1; }
-  "\$HOOK"
+  if ! HOOK_OUTPUT=\$("\$HOOK" 2>&1); then
+    echo "rig-render: pre-capture hook failed" >&2
+    printf '%s\n' "\$HOOK_OUTPUT" >&2
+    exit 1
+  fi
 fi
 
 qs -p /root/omarchy/shell ipc call "\$MOD" toggle >/dev/null 2>&1
