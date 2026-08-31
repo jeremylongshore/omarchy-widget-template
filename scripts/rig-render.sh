@@ -121,6 +121,15 @@ else
 fi
 
 export HOME="\$RIG_ROOT" OMARCHY_PATH=/root/omarchy PLUGIN_DIR MOD
+if [ -d "\$PLUGIN_DIR/e2e/bin" ]; then
+  for fixture_command in "\$PLUGIN_DIR"/e2e/bin/*; do
+    [ -f "\$fixture_command" ] || continue
+    [ -x "\$fixture_command" ] || {
+      echo "rig-render: e2e/bin fixture commands must be executable" >&2; exit 1; }
+  done
+  export PATH="\$PLUGIN_DIR/e2e/bin:\$PATH"
+fi
+
 PRE_HOOK=\$PLUGIN_DIR/e2e/rig-before-shell.sh
 if [ -f "\$PRE_HOOK" ]; then
   [ -x "\$PRE_HOOK" ] || { echo "rig-render: e2e/rig-before-shell.sh is not executable" >&2; exit 1; }

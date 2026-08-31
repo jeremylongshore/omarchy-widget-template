@@ -46,6 +46,8 @@ test("template makes marketplace presentation requirements impossible to overloo
   assert.match(render, /refusing to write a clean receipt for a warning-bearing shell log/)
   assert.match(render, /grim "\\\$SHOT"/)
   assert.match(render, /-path '\.\/e2e\/\*'/)
+  assert.match(render, /export PATH="\\\$PLUGIN_DIR\/e2e\/bin:/)
+  assert.match(render, /e2e\/bin fixture commands must be executable/)
   const preShellHook = render.indexOf("PRE_HOOK=\\$PLUGIN_DIR/e2e/rig-before-shell.sh")
   const shellStart = render.indexOf("qs -p /root/omarchy/shell")
   const postStartHook = render.indexOf("HOOK=\\$PLUGIN_DIR/e2e/rig-before-capture.sh")
