@@ -45,6 +45,12 @@ test("template makes marketplace presentation requirements impossible to overloo
   assert.match(render, /visualInspection:\{status:"pending"/)
   assert.match(render, /refusing to write a clean receipt for a warning-bearing shell log/)
   assert.match(render, /grim "\\\$SHOT"/)
+  assert.match(render, /-path '\.\/e2e\/\*'/)
+  const preShellHook = render.indexOf("PRE_HOOK=\\$PLUGIN_DIR/e2e/rig-before-shell.sh")
+  const shellStart = render.indexOf("qs -p /root/omarchy/shell")
+  const postStartHook = render.indexOf("HOOK=\\$PLUGIN_DIR/e2e/rig-before-capture.sh")
+  assert.ok(preShellHook >= 0 && preShellHook < shellStart)
+  assert.ok(postStartHook > shellStart)
   assert.doesNotMatch(render, /grim -g|pkill/)
 
   const approval = read("scripts/approve-preview.sh")
@@ -59,6 +65,8 @@ test("template makes marketplace presentation requirements impossible to overloo
   assert.match(presentationGate, /concrete user interaction or visible behavior/)
   assert.match(presentationGate, /privacy, network, data, or write boundary/)
   assert.match(presentationGate, /generic marketing filler/)
+  assert.match(presentationGate, /render receipt does not match the current plugin tree/)
+  assert.match(presentationGate, /-path '\.\/e2e\/\*'/)
 })
 
 test("canonical freshness compares a cloned tree without executable downloads", () => {

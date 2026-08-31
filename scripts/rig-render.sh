@@ -3,10 +3,11 @@
 # and capture the dedicated 16:9 output without crop or post-processing.
 #
 # Generated plugins should add e2e/render-settings.json for deterministic inline
-# widget settings and may add executable e2e/rig-before-capture.sh to populate
-# a plugin-specific story. The hook runs inside the isolated rig container with
-# HOME, XDG_RUNTIME_DIR, WAYLAND_DISPLAY, SWAYSOCK, OMARCHY_PATH, MOD, and
-# PLUGIN_DIR exported. It must fail non-zero when its fixture/action fails.
+# widget settings. An executable e2e/rig-before-shell.sh may seed state before
+# Quickshell starts; e2e/rig-before-capture.sh may perform or verify a live action
+# after startup. Both hooks run inside the isolated rig container with HOME,
+# XDG_RUNTIME_DIR, WAYLAND_DISPLAY, SWAYSOCK, OMARCHY_PATH, MOD, and PLUGIN_DIR
+# exported, and must fail non-zero when their fixture or assertion fails.
 set -uo pipefail
 
 TARGET="$(cd "${1:-$(dirname "$0")/..}" && pwd)"
@@ -31,7 +32,7 @@ fingerprint() {
     find . -type f \
       -not -path './.git/*' -not -path './tests/*' \
       -not -path './scripts/*' -not -path './node_modules/*' \
-      \( -name '*.qml' -o -name '*.js' -o -name 'manifest.json' -o -perm -u+x \) \
+      \( -path './e2e/*' -o -name '*.qml' -o -name '*.js' -o -name 'manifest.json' -o -perm -u+x \) \
       -print0 2>/dev/null \
     | LC_ALL=C sort -z | xargs -0 cat 2>/dev/null | sha256sum | cut -d' ' -f1 )
 }
@@ -42,7 +43,7 @@ SOURCE_DIRTY=false
 if [[ "$SOURCE_COMMIT" == "unknown" ]] || \
    [[ -n "$(git -C "$TARGET" status --porcelain --untracked-files=all -- \
      '*.qml' '*.js' manifest.json bin preview.png README.md assets/banner.svg \
-     e2e/render-settings.json e2e/rig-before-capture.sh scripts/rig-render.sh 2>/dev/null)" ]]; then
+     e2e scripts/rig-render.sh 2>/dev/null)" ]]; then
   SOURCE_DIRTY=true
 fi
 
@@ -120,6 +121,12 @@ else
 fi
 
 export HOME="\$RIG_ROOT" OMARCHY_PATH=/root/omarchy PLUGIN_DIR MOD
+PRE_HOOK=\$PLUGIN_DIR/e2e/rig-before-shell.sh
+if [ -f "\$PRE_HOOK" ]; then
+  [ -x "\$PRE_HOOK" ] || { echo "rig-render: e2e/rig-before-shell.sh is not executable" >&2; exit 1; }
+  "\$PRE_HOOK"
+fi
+
 qs -p /root/omarchy/shell >"\$QS_LOG" 2>&1 &
 QS_PID=\$!
 sleep 18
