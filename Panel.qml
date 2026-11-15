@@ -2,6 +2,9 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+// Qt 6.12 adds its own Color type, so Omarchy's palette singleton must be
+// qualified (docs/omarchy-shell.md, Theme tokens).
+import qs.Commons as Commons
 import qs.Ui
 import "Model.js" as Model
 
@@ -183,7 +186,7 @@ Panel {
               textFormat: Text.PlainText
               width: parent.width
               elide: Text.ElideRight
-              color: root.bar ? root.bar.foreground : Color.foreground
+              color: root.bar ? root.bar.foreground : Commons.Color.foreground
               font.family: root.bar ? root.bar.fontFamily : Style.font.family
               font.pixelSize: Style.font.title
               font.bold: true
@@ -197,12 +200,12 @@ Panel {
             width: parent.width
             spacing: Style.space(2)
 
-            PanelSeparator { foreground: root.bar ? root.bar.foreground : Color.foreground }
+            PanelSeparator { foreground: root.bar ? root.bar.foreground : Commons.Color.foreground }
 
             PanelSectionHeader {
               text: "SECTION"
               leftPadding: Style.space(16)
-              foreground: root.bar ? root.bar.foreground : Color.foreground
+              foreground: root.bar ? root.bar.foreground : Commons.Color.foreground
               fontFamily: root.bar ? root.bar.fontFamily : Style.font.family
             }
 
@@ -222,7 +225,7 @@ Panel {
                   textFormat: Text.PlainText
                   width: Math.min(implicitWidth, parent.width * 0.6)
                   elide: Text.ElideRight
-                  color: root.bar ? root.bar.foreground : Color.foreground
+                  color: root.bar ? root.bar.foreground : Commons.Color.foreground
                   font.family: root.bar ? root.bar.fontFamily : Style.font.family
                   font.pixelSize: Style.font.body
                 }
@@ -235,7 +238,7 @@ Panel {
                   textFormat: Text.PlainText
                   width: Math.min(implicitWidth, parent.width * 0.35)
                   elide: Text.ElideRight
-                  color: root.bar ? Qt.darker(root.bar.foreground, 1.3) : Color.muted
+                  color: root.bar ? Qt.darker(root.bar.foreground, 1.3) : Commons.Color.muted
                   font.family: root.bar ? root.bar.fontFamily : Style.font.family
                   font.pixelSize: Style.font.bodySmall
                 }

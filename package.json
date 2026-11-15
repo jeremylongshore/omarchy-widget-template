@@ -1,6 +1,6 @@
 {
   "name": "omarchy-widget-template",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Omarchy bar widget template - dev harness for the Model.js data layer",
   "scripts": {

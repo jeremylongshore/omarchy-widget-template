@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.YOURNAME.widget-name",
   "name": "Widget Name",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Your Name",
   "license": "MIT",
   "description": "Build an Omarchy bar widget from a production-ready starting point instead of an empty folder. This template pairs the Quickshell host and panel contracts with accessible controls. It adds bounded plain-text rendering, a JavaScript model, offline unit and mutation tests, canonical security gates, Buzz validation, and shell screenshot evidence. Replace every Widget Name placeholder, author a product-specific SVG banner, seed your live preview, and ship with exact-run proof instead of assumptions.",

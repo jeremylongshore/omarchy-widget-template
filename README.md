@@ -62,6 +62,11 @@ real entry and had to be swept after the fact.
    state must use a descriptor-bound lifecycle and red-proof final-file,
    temporary-file, parent-swap, FIFO, and oversized-input cases. `mktemp + mv`
    and a pathname `stat` are not sufficient evidence.
+9. **Qualify the palette as `Commons.Color`.** Qt 6.12 adds its own `Color`
+   type, so Omarchy's shell contract (`docs/omarchy-shell.md`, Theme tokens)
+   requires `import qs.Commons as Commons` beside `import qs.Commons` and
+   `Commons.Color.<token>` in place of bare `Color.<token>`. The contract test
+   refuses a bare `Color.` in any shipped QML.
 
 ## Pre-submit checklist
 
