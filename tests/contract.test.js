@@ -93,3 +93,15 @@ test("canonical freshness compares a cloned tree without executable downloads", 
   assert.match(freshness, /sha256sum "\$canonical"/)
   assert.doesNotMatch(freshness, /\bcurl\b|\bwget\b/)
 })
+
+test("QML qualifies Omarchy's palette as Commons.Color, never bare Color", () => {
+  // Qt 6.12 introduces its own Color type; omarchy docs/omarchy-shell.md
+  // (Theme tokens) requires plugins to import qs.Commons with an alias.
+  const files = fs.readdirSync(root).filter(name => name.endsWith(".qml"))
+  assert.ok(files.length > 0)
+  for (const file of files) {
+    const source = fs.readFileSync(path.join(root, file), "utf8")
+    assert.doesNotMatch(source, /(^|[^\w.])Color\./m, file + " uses bare Color")
+    if (/Commons\.Color\./.test(source)) assert.match(source, /^import qs\.Commons as Commons$/m, file)
+  }
+})
